@@ -169,9 +169,9 @@ def download_song(song_data, data_from_get_song=None):
         artists_by_name.insert(0,artist['name'])
 
     if str(song_data['album']) != "None":
-        mp3_path = f"{MUSIC_OUTPUT_PATH}/{artists_by_name[0]}/{str(song_data['album']['name'])}/{str(song_data['title'])}.mp3"
+        mp3_path = Path(f"{MUSIC_OUTPUT_PATH}/{artists_by_name[0]}/{str(song_data['album']['name'])}/{str(song_data['title'])}.mp3")
     else:
-        mp3_path = f"{MUSIC_OUTPUT_PATH}/{artists_by_name[0]}/{str(song_data['title'])}.mp3"
+        mp3_path = Path(f"{MUSIC_OUTPUT_PATH}/{artists_by_name[0]}/{str(song_data['title'])}.mp3")
 
     # Download song
 
@@ -244,11 +244,11 @@ def download_song(song_data, data_from_get_song=None):
         for artist in artists_by_name:
             if artist == artists_by_name[0]:
                 continue
-            mp3_folder_to_path = f"{MUSIC_OUTPUT_PATH}/{artist}/{str(song_data['album']['name'])}"
+            mp3_folder_to_path = Path(f"{MUSIC_OUTPUT_PATH}/{artist}/{str(song_data['album']['name'])}")
             if str(song_data['album']) != "None":
-                mp3_path_to = f"{mp3_folder_to_path}/{str(song_data['title'])}.mp3"
+                mp3_path_to = Path(f"{mp3_folder_to_path}/{str(song_data['title'])}.mp3")
             else:
-                mp3_path_to = f"{mp3_folder_to_path}/{str(song_data['title'])}.mp3"
+                mp3_path_to = Path(f"{mp3_folder_to_path}/{str(song_data['title'])}.mp3")
             os.makedirs(mp3_folder_to_path, exist_ok=True)
             shutil.copy2(mp3_path, mp3_path_to)
 
