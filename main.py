@@ -8,7 +8,7 @@ import requests
 import yt_dlp
 from ytmusicapi import YTMusic, OAuthCredentials
 
-
+FORBIDDEN_CHARS = [':', ';', '<', '>', '"', '/', '|', '?', '*']
 MUSIC_OUTPUT_PATH = Path(f"{Path.home()}/Music/JellyfinMusic")
 CACHE_PATH = Path("cache")
 ARTIST_CACHE_PATH = Path(f"{CACHE_PATH}/artist_cache.txt")
@@ -72,6 +72,8 @@ def iterate_through_artist_discographies(ytmusic):
 
         if song_playlist != None:
             for song in ytmusic.get_playlist(song_playlist)['tracks']:
+                song['title'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
+                song['album']['name'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
                 print(song['title'])
 
                 if song['videoId'] not in existing_songs: # second check because artist loop - would happen anyways
@@ -106,6 +108,10 @@ def iterate_through_liked_songs(ytmusic):
 
     
     for song in liked_songs:
+        song['title'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
+        song['album']['name'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
+
+
         #print(str(song['title']) + " - " + str(song['videoId']))
         if song['videoId'] == None:
             continue
@@ -115,6 +121,8 @@ def iterate_through_liked_songs(ytmusic):
         if song_id not in existing_songs:
 
             for artist in song['artists']:
+                artist['name'] = ''.join(char for char in artist['name'] if char not in FORBIDDEN_CHARS)
+
                 print("-----------" + str(artist['name']) + " - " + str(artist['id']) + "-----------")
                 if artist['id'] == None:
                     print("Artist not found")
@@ -155,6 +163,7 @@ def iterate_through_liked_songs(ytmusic):
 
 
 def download_song(song_data, data_from_get_song=None):
+    
 
     #lazy enforcement everywhere for making sure there's time between downloads
     sleep(seconds_between_downloads)
@@ -166,6 +175,7 @@ def download_song(song_data, data_from_get_song=None):
 
     artists_by_name = []
     for artist in song_data['artists']:
+        artist['name'] =''.join(char for char in artist['name'] if char not in FORBIDDEN_CHARS)
         artists_by_name.insert(0,artist['name'])
 
     if str(song_data['album']) != "None":
