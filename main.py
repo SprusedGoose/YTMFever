@@ -182,7 +182,7 @@ def download_song(song_data, data_from_get_song=None):
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': mp3_path.removesuffix(".mp3"),
+        'outtmpl': str(mp3_path).removesuffix(".mp3"),
         'quiet': True,
         'no_warnings': True,
     }
