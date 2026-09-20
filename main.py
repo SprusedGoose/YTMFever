@@ -14,7 +14,7 @@ CACHE_PATH = Path("cache")
 ARTIST_CACHE_PATH = Path(f"{CACHE_PATH}/artist_cache.txt")
 SONG_CACHE_PATH = Path(f"{CACHE_PATH}/song_cache.txt")
 
-download_limit = 10
+download_limit = 1000
 reset_cache = False
 should_get_date = True
 seconds_between_downloads = 10
