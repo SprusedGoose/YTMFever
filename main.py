@@ -1,3 +1,4 @@
+import random
 import os
 from pathlib import Path
 from mutagen.mp3 import MP3
@@ -168,7 +169,7 @@ def download_song(song_data, data_from_get_song=None):
     
 
     #lazy enforcement everywhere for making sure there's time between downloads
-    sleep(seconds_between_downloads)
+    sleep(seconds_between_downloads + random.randint(0,20))
 
 
     url = f"www.youtube.com/watch?v={str(song_data['videoId'])}"
@@ -230,7 +231,7 @@ def download_song(song_data, data_from_get_song=None):
         audio["TDRC"] = TDRC(encoding=3, text=str(data_from_get_song['microformat']['microformatDataRenderer']['uploadDate'].split('T')[0]))
     if rating != "":
         audio["TXXX"] = TXXX(encoding=3, desc="RATING", text=rating)
-    audio["COMM"] = COMM(encoding=3, lang="eng", desc="Description", text=song_data['videoId'])
+    audio["COMM"] = COMM(encoding=3, lang="eng", desc=song_data['videoId'], text=song_data['videoId'])
 
     response = requests.get(song_data['thumbnails'][-1]['url'], stream=True)
 
