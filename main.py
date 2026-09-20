@@ -11,16 +11,22 @@ from ytmusicapi import YTMusic, OAuthCredentials
 MUSIC_OUTPUT_PATH = Path(f"{Path.home()}/Music/JellyfinMusic")
 ARTIST_CACHE_PATH = Path("cache/artist_cache.txt")
 SONG_CACHE_PATH = Path("cache/song_cache.txt")
-LIKED_SONG_CACHE_PATH = Path("cache/liked_song_cache.txt")
 
 download_limit = 10
-
+reset_cache = False
 should_get_date = True
 
+downloaded_since_last_time_limit_reached = 0
+
 def main() -> None:
+    
+
     print(f"Output Path: {MUSIC_OUTPUT_PATH}" )
     if not os.path.exists(MUSIC_OUTPUT_PATH):
         os.mkdir(MUSIC_OUTPUT_PATH)
+
+    if reset_cache:
+        shutil.rmtree("cache")
 
     if not os.path.exists(Path("cache")):
         os.mkdir(Path("cache"))
@@ -33,57 +39,105 @@ def main() -> None:
         cache = open(SONG_CACHE_PATH, "w")
         cache.write("")
         cache.close()
-    if not os.path.exists(LIKED_SONG_CACHE_PATH):
-        cache = open(LIKED_SONG_CACHE_PATH, "w")
-        cache.write("")
-        cache.close()
 
     #ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=OAUTH_CLIENT_ID, client_secret=OAUTH_CLIENT_SECRET))
     ytmusic = YTMusic("browser.json")
 
+    #iterate_through_liked_songs(ytmusic)
+
+
+    if downloaded_since_last_time_limit_reached < download_limit:
+        iterate_through_artist_discographies(ytmusic)
+
+
+def iterate_through_artist_discographies(ytmusic):
+    global downloaded_since_last_time_limit_reached
+    print("Iterating through artist discographies...")
+
+    artist_cache = open(ARTIST_CACHE_PATH, "r")
+    song_cache = open(SONG_CACHE_PATH, "r+")
+
+    artists = list(line.strip("\n") for line in artist_cache.readlines())
+    existing_songs = list(line.strip("\n") for line in song_cache.readlines())
+
+    for artist in artists:
+        song_playlist = None
+        try:
+            song_playlist = ytmusic.get_artist(artist)['songs']['browseId']
+        except:
+            raise Exception("Artist is a user, skipping")
+            continue
+
+        if song_playlist != None:
+            for song in ytmusic.get_playlist(song_playlist)['tracks']:
+                print(song['title'])
+
+                if song['videoId'] not in existing_songs: # second check because artist loop - would happen anyways
+                    print(song)
+                    try:
+                        if should_get_date:
+                            download_song(song, ytmusic.get_song(song['videoId']))
+                        else:
+                            download_song(song)
+                    except: 
+                        raise Exception(f"Failed to download song: {song['title']}")
+                    downloaded_since_last_time_limit_reached += 1
+                    song_cache.write(song['videoId'] + "\n")
+                    existing_songs.append(song['videoId'])
+
+                    if downloaded_since_last_time_limit_reached >= download_limit:
+                        downloaded_since_last_time_limit_reached = 0
+                        print(f"Finished downloading {download_limit} songs.")
+                        return
+
+
+def iterate_through_liked_songs(ytmusic):
+    global downloaded_since_last_time_limit_reached
+    print("Iterating through liked songs...")
 
     artist_cache = open(ARTIST_CACHE_PATH, "r+")
     song_cache = open(SONG_CACHE_PATH, "r+")
-    liked_song_cache = open(LIKED_SONG_CACHE_PATH, "r+")
-
     
     liked_songs = ytmusic.get_liked_songs()['tracks']
     existing_artists = list(line.strip("\n") for line in artist_cache.readlines())
     existing_songs = list(line.strip("\n") for line in song_cache.readlines())
-    existing_liked_songs = list(line.strip("\n") for line in liked_song_cache.readlines())
 
-    downloaded_since_last_time_limit_reached = 0
+    
     for song in liked_songs:
         #print(str(song['title']) + " - " + str(song['videoId']))
         if song['videoId'] == None:
             continue
 
         song_id = str(song['videoId'])
-        if song_id not in existing_liked_songs:
-            liked_song_cache.write(song_id + "\n")
-            existing_liked_songs.append(song_id)
     
         if song_id not in existing_songs:
-            
-
 
             for artist in song['artists']:
-                #print(str(artist['name']) + " - " + str(artist['id']))
+                print("-----------" + str(artist['name']) + " - " + str(artist['id']) + "-----------")
                 if artist['id'] == None:
-                    print("Artist not found - user may have privated video")
+                    print("Artist not found")
                     continue
 
                 if song_id not in existing_songs: # second check because artist loop - would happen anyways
+                    print(song['title'])
                     print(song)
-                    if should_get_date:
-                        download_song(song, ytmusic.get_song(song_id))
-                    else:
-                        download_song(song)
+                    try:
+                        if should_get_date:
+                            download_song(song, ytmusic.get_song(song_id))
+                        else:
+                            download_song(song)
+                    except: 
+                        raise Exception(f"Failed to download song: {song['title']}")
                     downloaded_since_last_time_limit_reached += 1
                     song_cache.write(song_id + "\n")
                     existing_songs.append(song_id)
 
                     if downloaded_since_last_time_limit_reached >= download_limit:
+                        artist_id = str(artist['id'])
+                        if artist_id not in existing_artists:
+                            artist_cache.write(artist_id + "\n")
+                            existing_artists.append(artist_id)
+
                         downloaded_since_last_time_limit_reached = 0
                         print(f"Finished downloading {download_limit} songs.")
                         return
@@ -92,8 +146,10 @@ def main() -> None:
                 if artist_id not in existing_artists:
                     artist_cache.write(artist_id + "\n")
                     existing_artists.append(artist_id)
-        #print("\n")
+        print("\n")
 
+    artist_cache.close()
+    song_cache.close()
 
 
 def download_song(song_data, data_from_get_song=None):
