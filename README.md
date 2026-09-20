@@ -23,8 +23,10 @@ As long as the project has been authenticated with the ytmusicapi, and the virtu
 Options are currently only implemented as variables at the top of main.py.  These include;
 - should_get_date : determines whether or not to send an extra request to get and apply a song's upload date.  By default this is True (on).
 - download_limit : how many songs to download when the script runs.  By default this is 10.
+- seconds_between_downloads : how long should wait between downloads.  Could error out if spamming ytdlp too much.  By default this is 10.
+- reset_cache: whether or not the cache should be reset every time.  By default this is False.
 - MUSIC_OUTPUT_PATH : location music will be installed to.  By default this is $HOME/Music/Jellyfin.
-
+- ARTIST_CACHE_PATH
 
 ## Further development
 

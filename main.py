@@ -3,18 +3,21 @@ from pathlib import Path
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, TIT2, TPE1, TALB, TDRC, APIC, TXXX
 import shutil
+from time import sleep
 import requests
 import yt_dlp
 from ytmusicapi import YTMusic, OAuthCredentials
 
 
 MUSIC_OUTPUT_PATH = Path(f"{Path.home()}/Music/JellyfinMusic")
-ARTIST_CACHE_PATH = Path("cache/artist_cache.txt")
-SONG_CACHE_PATH = Path("cache/song_cache.txt")
+CACHE_PATH = Path("cache")
+ARTIST_CACHE_PATH = Path(f"{CACHE_PATH}/artist_cache.txt")
+SONG_CACHE_PATH = Path(f"{CACHE_PATH}/song_cache.txt")
 
 download_limit = 10
 reset_cache = False
 should_get_date = True
+seconds_between_downloads = 10
 
 downloaded_since_last_time_limit_reached = 0
 
@@ -43,8 +46,7 @@ def main() -> None:
     #ytmusic = YTMusic("oauth.json", oauth_credentials=OAuthCredentials(client_id=OAUTH_CLIENT_ID, client_secret=OAUTH_CLIENT_SECRET))
     ytmusic = YTMusic("browser.json")
 
-    #iterate_through_liked_songs(ytmusic)
-
+    iterate_through_liked_songs(ytmusic)
 
     if downloaded_since_last_time_limit_reached < download_limit:
         iterate_through_artist_discographies(ytmusic)
@@ -153,6 +155,11 @@ def iterate_through_liked_songs(ytmusic):
 
 
 def download_song(song_data, data_from_get_song=None):
+
+    #lazy enforcement everywhere for making sure there's time between downloads
+    sleep(seconds_between_downloads)
+
+
     url = f"www.youtube.com/watch?v={str(song_data['videoId'])}"
 
     # Deal with data necessary for song path (and some metadata)
