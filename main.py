@@ -72,8 +72,8 @@ def iterate_through_artist_discographies(ytmusic):
 
         if song_playlist != None:
             for song in ytmusic.get_playlist(song_playlist)['tracks']:
-                song['title'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
-                song['album']['name'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
+                song['title'] = ''.join(char for char in song['title'] if char not in FORBIDDEN_CHARS)
+                song['album']['name'] = ''.join(char for char in song['title'] if char not in FORBIDDEN_CHARS)
                 print(song['title'])
 
                 if song['videoId'] not in existing_songs: # second check because artist loop - would happen anyways
@@ -108,8 +108,8 @@ def iterate_through_liked_songs(ytmusic):
 
     
     for song in liked_songs:
-        song['title'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
-        song['album']['name'] = ''.join(char for char in song_data['title'] if char not in FORBIDDEN_CHARS)
+        song['title'] = ''.join(char for char in song['title'] if char not in FORBIDDEN_CHARS)
+        song['album']['name'] = ''.join(char for char in song['title'] if char not in FORBIDDEN_CHARS)
 
 
         #print(str(song['title']) + " - " + str(song['videoId']))
