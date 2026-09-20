@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, TIT2, TPE1, TALB, TDRC, APIC, TXXX
+from mutagen.id3 import ID3, TIT2, TPE1, TALB, TDRC, APIC, TXXX, COMM
 import shutil
 from time import sleep
 import requests
@@ -230,6 +230,7 @@ def download_song(song_data, data_from_get_song=None):
         audio["TDRC"] = TDRC(encoding=3, text=str(data_from_get_song['microformat']['microformatDataRenderer']['uploadDate'].split('T')[0]))
     if rating != "":
         audio["TXXX"] = TXXX(encoding=3, desc="RATING", text=rating)
+    audio["COMM"] = COMM(encoding=3, lang="eng", desc="Description", text=song_data['videoId'])
 
     response = requests.get(song_data['thumbnails'][-1]['url'], stream=True)
 
